@@ -1,0 +1,7 @@
+backend/hf_models
+backend/app/db/app.db
+venv
+.vscode
+__pycache__/
+*.pyc
+__init__.py
