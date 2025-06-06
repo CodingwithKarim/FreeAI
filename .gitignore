@@ -1,10 +1,17 @@
-venv
+# Ignore virtual environment and editor settings
+venv/
+.vscode/
 
-.vscode
+# Ignore everything in hugging_face_models except .gitkeep
+backend/hugging_face_models/*
+!backend/hugging_face_models/.gitkeep
 
-backend/hugging_face_models
+# Ignore app database
 backend/data/app.db
 
+# Ignore Python cache and compiled files
 __pycache__/
 *.pyc
-__init__.py
+
+# Ignore init files
+**/__init__.py
