@@ -26,7 +26,6 @@ type ChatContextType = {
   sessions: Session[];
   models: Model[];
   filteredModels: Model[];
-  // providers: Provider[];
   chatMessages: ChatMessage[];
 
   // Selection states
@@ -99,41 +98,44 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .catch(console.error);
   }, []);
 
-useEffect(() => {
-  const fetchInitialModels = async () => {
-    try {
-      const res = await fetch("api/models/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: "",
-          limit: 3,
-          sortBy: "downloads",
-          filters: [],
-        }),
-      });
-      const data = await res.json();
+  useEffect(() => {
+    const fetchInitialModels = async () => {
+      if (!navigator.onLine) {
+        console.warn("User is offline. Skipping model fetch.");
+        return;
+      }
 
-      const topModels: ModelSearchData[] = (data.models || []).map((m: any) => ({
-        id: m.id,
-        size: String(m.size),
-        downloads: Number(m.downloads),
-        likes: Number(m.likes),
-        isQuantized: Boolean(m.isQuantized),
-        isUncensored: Boolean(m.isUncensored),
-        trending_score: Number(m.trending_score || 0),
-      }));
+      try {
+        const res = await fetch("api/models/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: "",
+            limit: 3,
+            sortBy: "downloads",
+            filters: [],
+          }),
+        });
+        const data = await res.json();
 
-      console.log(topModels)
+        const topModels: ModelSearchData[] = (data.models || []).map((m: any) => ({
+          id: m.id,
+          size: String(m.size),
+          downloads: Number(m.downloads),
+          likes: Number(m.likes),
+          isQuantized: Boolean(m.isQuantized),
+          isUncensored: Boolean(m.isUncensored),
+          trending_score: Number(m.trending_score || 0),
+        }));
 
-      setInitialModels(topModels);
-    } catch (err) {
-      console.error("Initial model fetch failed", err);
-    }
-  };
+        setInitialModels(topModels);
+      } catch (err) {
+        console.error("Initial model fetch failed", err);
+      }
+    };
 
-  fetchInitialModels();
-}, []);
+    fetchInitialModels();
+  }, []);
 
   useEffect(() => {
     if (!selectedSession) return;
@@ -153,7 +155,6 @@ useEffect(() => {
 
     switch (selectedFilter) {
       case "Quantized":
-        console.log("testing IsQuantized")
         newList = models.filter(m => m.is_quantized);
         break;
       case "Uncensored":
@@ -247,8 +248,6 @@ useEffect(() => {
       const session = await createSession(name.trim());
       setSessions((prev) => [...prev, session]);
 
-      console.log("New session created:", session);
-
       setSelectedSession(session.id);
 
       setChatMessages([]);
@@ -260,7 +259,6 @@ useEffect(() => {
   };
 
   const handleDeleteSession = async () => {
-    console.log("Session active:", sessionActive);
     if (!sessionActive) return;
 
     // 1) fire the warning
@@ -304,7 +302,6 @@ useEffect(() => {
     try {
       const success = await deleteSession(selectedSession);
 
-      console.log("Session deleted:", success);
       if (success) {
         setSessions((prev) => prev.filter((s) => s.id !== selectedSession));
         setSelectedSession("");
@@ -351,7 +348,7 @@ useEffect(() => {
       title: "Clear Chat Context?",
       text: warningMessage,
       icon: "warning",
-      iconColor: "#A78BFA", 
+      iconColor: "#A78BFA",
       showCancelButton: true,
       confirmButtonText: "Yes, clear it",
       cancelButtonText: "Cancel",
@@ -446,7 +443,6 @@ useEffect(() => {
         },
       ]);
 
-      console.log(chatMessages)
     } catch (error) {
       alert("Something went wrong.");
       console.error(error);
@@ -541,7 +537,7 @@ useEffect(() => {
         const v = document.querySelector<HTMLInputElement>('input[name="precision"]:checked')?.value;
         if (!v) Swal.showValidationMessage("Please pick one style");
         return v;
-      }
+      },
     });
 
     if (!precision) {
@@ -558,21 +554,19 @@ useEffect(() => {
       });
 
       if (!resp.ok) {
-        console.log("response failed")
         const body = await resp.json().catch(() => ({}));
         const msg = (body as any).detail || `HTTP ${resp.status}`;
         throw new Error(msg);
       }
 
       let state;
+
       do {
         const res = await fetch("api/models/load/status");
 
         const responseModels = await res.json();
 
-        console.log(responseModels)
-
-        const me = (responseModels as any[]).find((m: any) => m.model_id === selectedModel.id);
+        const me = (responseModels as any[]).find((m: any) => m.id === selectedModel.id);
 
         state = me?.status;
 
@@ -584,7 +578,6 @@ useEffect(() => {
       } while (state === "loading");
 
       setSelectedModel(selectedModel);
-
     }
     catch (err: any) {
       console.error("Failed to load model:", err);

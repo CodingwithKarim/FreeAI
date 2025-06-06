@@ -1,0 +1,9 @@
+# List of packages required to run the server 
+# Users also need to download Pytorch and get their cuda equivalent pip command from this link: https://pytorch.org/get-started/locally/
+
+uvicorn
+fastapi
+huggingface_hub[hf_xet]
+transformers
+bitsandbytes
+accelerate

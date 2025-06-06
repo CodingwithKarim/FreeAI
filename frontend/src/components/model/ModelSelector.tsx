@@ -33,7 +33,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
  return (
     <div className="flex-1">
       <label className="flex items-center text-sm font-semibold text-gray-700 mb-1 space-x-2">
-        <CubeIcon className="w-5 h-5 text-purple-500" aria-hidden />
+        <CubeIcon className="w-5 h-5 text-purple-500"/>
         <span>Model</span>
       </label>
 

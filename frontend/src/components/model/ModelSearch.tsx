@@ -149,7 +149,6 @@ export default function ModelSearch({ setDropdownModels, initialModels }: ModelS
     ];
 
     const toggleFilter = (f: string) => {
-        console.log(f)
         setFilters((prev) =>
             prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]
         );
@@ -158,14 +157,16 @@ export default function ModelSearch({ setDropdownModels, initialModels }: ModelS
     // ─── Fetch & sort ────────────────────────────────────────────────────────
     const fetchModels = useCallback(
         async (q: string) => {
+            if (!navigator.onLine) {
+                console.warn("User is offline. Skipping model fetch.");
+                return;
+            }
+
             setIsLoading(true);
             setError(null);
 
             try {
                 let query = q;
-
-                console.log(`Limit: ${limit}`)
-
 
                 const res = await fetch("api/models/search", {
                     method: "POST",
@@ -184,8 +185,6 @@ export default function ModelSearch({ setDropdownModels, initialModels }: ModelS
                     isUncensored: Boolean(m.isUncensored),
                     trending_score: Number(m.trending_score || 0)
                 }));
-
-                console.log(list)
 
                 list.sort(sortFn(sortBy));
 
@@ -217,7 +216,6 @@ export default function ModelSearch({ setDropdownModels, initialModels }: ModelS
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const v = e.target.value;
         setQuery(v);
-        setIsLoading(true);
         debouncedSearch(v);
     };
 
@@ -659,9 +657,6 @@ export default function ModelSearch({ setDropdownModels, initialModels }: ModelS
                                                             }}
                                                         />
                                                     </Tooltip>
-                                                    {/* <Typography variant="caption" align="center">
-                                                        {limit}
-                                                    </Typography> */}
                                                 </Box>
                                             </Box>
                                         </Stack>
@@ -691,7 +686,6 @@ export default function ModelSearch({ setDropdownModels, initialModels }: ModelS
                                                                 edge="end"
                                                                 size="small"
                                                                 disableRipple
-                                                                // onClick={() => handleModelDelete(m)}
                                                                 sx={{
                                                                     color: 'purple',
                                                                     '&:hover': { backgroundColor: 'transparent' },
@@ -739,7 +733,10 @@ export default function ModelSearch({ setDropdownModels, initialModels }: ModelS
 
                                                         <ListItemText
                                                             primary={m.id}
-                                                            primaryTypographyProps={{ sx: { wordBreak: "break-all", fontWeight: 500 } }}
+                                                            slotProps={{
+                                                                secondary: { component: "div" },
+                                                                primary: { sx: { wordBreak: "break-all", fontWeight: 500 } }
+                                                            }}
                                                             secondary={
                                                                 <Box
                                                                     sx={{
@@ -762,44 +759,9 @@ export default function ModelSearch({ setDropdownModels, initialModels }: ModelS
                                                                         <TrendingUpIcon fontSize="small" sx={{ color: "#A78BFA" }} />
                                                                         {m.trending_score}
                                                                     </Box>
-
-                                                                    {/* {ds?.status === "ready" && (
-
-                                                                        <Typography
-                                                                            component="span"
-                                                                            sx={{ color: "success.main", fontWeight: 600 }}
-                                                                        >
-                                                                            Downloaded ✓
-                                                                        </Typography>
-                                                                    )}
-
-                                                               
-                                                                    {ds?.status === "error" && (
-                                                                        <Typography
-                                                                            component="span"
-                                                                            sx={{ color: "error.main", fontWeight: 600 }}
-                                                                        >
-                                                                            Failed
-                                                                        </Typography>
-                                                                    )} */}
                                                                 </Box>
                                                             }
                                                         />
-
-                                                        {/* {isBusy && (
-                                                            <CircularProgress
-                                                                size={24}
-                                                                // spin for both "pending" and "downloading" if you don’t yet have a non-zero progress
-                                                                variant={ds?.progress && ds.progress > 0 ? "determinate" : "indeterminate"}
-                                                                value={ds?.progress}
-                                                                sx={{
-                                                                    position: "absolute",
-                                                                    right: 16,
-                                                                    top: "50%",
-                                                                    transform: "translateY(-50%)",
-                                                                }}
-                                                            />
-                                                        )} */}
                                                     </ListItemButton>
                                                 </ListItem>
                                             );

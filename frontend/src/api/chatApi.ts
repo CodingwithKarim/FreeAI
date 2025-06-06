@@ -9,17 +9,17 @@ export const fetchChatHistory = async (
     const r = await fetch("/api/models/history", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({"session_id": sessionID, "model_id": modelID, "share_context": sharedContext }),
+      body: JSON.stringify({ "session_id": sessionID, "model_id": modelID, "share_context": sharedContext }),
     });
     const d = await r.json();
     const msgs: ChatMessage[] = (d.messages || []).map((m: any) => ({
-      role: m.role,
-      name: m.role === "user" ? "You" : (m.name),
+      role: m.message.role,
+      name: m.message.role === "user" ? "You" : (m.name),
       time: new Date(m.timestamp).toLocaleTimeString([], {
-        hour: "2-digit",
         minute: "2-digit",
+        hour: "2-digit",
       }),
-      text: m.content,
+      text: m.message.content,
     }));
     return msgs;
   } catch (error) {

@@ -1,7 +1,6 @@
 import React from "react";
-import ModelSearch from "../ModelSearchRevise";
+import ModelSearch from "./ModelSearch";
 import { ModelSelector } from "./ModelSelector";
-// import { ModelSelector } from "./ModelSelector";
 import { useChat } from "../../context/ChatContext";
 import { ModelFilters } from "./ModelFilter";
 
