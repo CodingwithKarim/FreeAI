@@ -51,7 +51,6 @@ export const sendChatMessage = async (
     }),
   });
   if (!res.ok) throw new Error("Failed to send message");
-  console.log("Response: ", res);
   const { message } = await res.json();
   return message;
 };

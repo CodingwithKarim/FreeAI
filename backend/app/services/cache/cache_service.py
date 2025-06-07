@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 from typing import Dict, List
+
+from fastapi import BackgroundTasks
 from app.db.messages import get_session_messages
 from app.utils.types.cache_types import(
     ContextMessage,
@@ -8,7 +10,7 @@ from app.utils.types.cache_types import(
     ClearSessionCacheRequest,
     GetChatHistoryRequest
 )
-from app.services.cache.helper import convert_utc_to_local
+from app.services.cache.helper import _delete_messages, _convert_utc_to_local
 
 # Global cache to store sessions and their respective messages
 session_cache: Dict[str, List[SessionCacheEntry]] = {}
@@ -27,7 +29,7 @@ def svc_load_session_messages(session_id: str) -> None:
             model_id=model,
             name=name,
             message=ContextMessage(role=role, content=content),
-            timestamp= convert_utc_to_local(timestamp)
+            timestamp= _convert_utc_to_local(timestamp)
         )
         for model, name, role, content, timestamp in rows
     ]
@@ -61,7 +63,7 @@ def svc_get_chat_history(request: GetChatHistoryRequest) -> List[GetChatHistoryD
         for msg in chatMessages if msg.model_id == request.model_id
     ]
 
-def svc_clear_session_cache(request: ClearSessionCacheRequest):     
+def svc_clear_session_cache(request: ClearSessionCacheRequest, background_task: BackgroundTasks):     
     # If session_id is not present in cache, do nothing
     if request.session_id not in session_cache:
         return
@@ -75,6 +77,14 @@ def svc_clear_session_cache(request: ClearSessionCacheRequest):
         session_cache[request.session_id] = [
             m for m in session_cache[request.session_id] if m.model_id != request.model_id
         ]
+    
+    background_task.add_task(
+        _delete_messages,
+        request.session_id,
+        request.model_id,
+        request.share_context
+    )
+    
         
 def get_context_messages(session_id: str, model_id: str, share_context: bool) -> List[ContextMessage]:
     # Check if session_id is present in cache and add it if not present

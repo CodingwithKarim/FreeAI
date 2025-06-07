@@ -42,6 +42,7 @@ CREATE_MESSAGES_TABLE = (
             content TEXT NOT NULL,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(session_id) REFERENCES sessions(id)
+            ON DELETE CASCADE
         );
     """
 )
@@ -157,4 +158,26 @@ GET_MODEL_DIRECTORY_PATH = (
     """
         SELECT local_path FROM download_tasks WHERE model_id = ? AND status = 'ready'
     """
+)
+
+DELETE_MODEL_MESSAGES = (
+    """
+        DELETE
+        FROM
+        messages
+        WHERE session_id = ? AND model_id = ?
+    """
+)
+
+DELETE_SESSION_MESSAGES = (
+    """
+        DELETE 
+        FROM 
+        messages 
+        WHERE session_id = ?
+    """
+)
+
+ENABLE_FOREIGN_KEYS = (
+    "PRAGMA foreign_keys = ON;"
 )

@@ -24,7 +24,7 @@ from app.services.model.helper import(
     _model_weights_size,
     _is_quantizable,
     _is_uncensored,
-    update_cache_and_database    
+    _update_cache_and_database    
 ) 
 from app.utils.types.model_types import (
     DownloadModelRequest,
@@ -55,7 +55,7 @@ async def svc_run_local_inference(request: RunInferenceRequest) -> Union[str, di
     # We are doing this in a background task to avoid blocking request thread since client does not need to wait for this
     asyncio.create_task(
         run_in_threadpool(
-            update_cache_and_database,
+            _update_cache_and_database,
             request,
             inference_output
         )   

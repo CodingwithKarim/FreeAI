@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from app.db.init_database import get_db
 from app.utils.types.model_types import RunInferenceRequest
-from app.db.sql_queries import GET_SESSION_MESSAGES, INSERT_MESSAGE
+from app.db.sql_queries import DELETE_MODEL_MESSAGES, DELETE_SESSION_MESSAGES, GET_SESSION_MESSAGES, INSERT_MESSAGE
 
 def get_session_messages(session_id: str) -> List[Tuple[str, str, str]]:
     with get_db() as conn:
@@ -21,3 +21,20 @@ def persist_user_and_assistant_message(request: RunInferenceRequest, inference_o
                 request.session_id, request.model_id, "assistant", inference_output
             )
         )
+        
+def delete_session_messages(session_id: str):
+    with get_db() as connection:
+        # Delete all messages associated with a session
+        connection.execute(
+           DELETE_SESSION_MESSAGES,
+            (session_id,)
+        )
+        
+def delete_session_model_messages(session_id: str, model_id: str):
+    # Delete messages associated with session + model
+    with get_db() as connection:
+        connection.execute(
+            DELETE_MODEL_MESSAGES,
+        (session_id, model_id)
+        )
+    

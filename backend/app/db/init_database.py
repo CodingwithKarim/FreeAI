@@ -7,6 +7,7 @@ from app.db.sql_queries import (
     CREATE_DOWNLOAD_TASKS_TABLE,
     CREATE_MESSAGES_TABLE,
     CREATE_MODELS_TABLE,
+    ENABLE_FOREIGN_KEYS,
 )
 
 # Path to SQLite file (will be created if missing)
@@ -26,7 +27,7 @@ def init_db() -> None:
         connection.execute(CREATE_DOWNLOAD_TASKS_TABLE)
         connection.execute(CREATE_MODELS_TABLE)
         connection.execute(CREATE_MESSAGES_TABLE)
-
+        
         # Save changes
         connection.commit()
         
@@ -51,6 +52,10 @@ def get_db():
     try:
         # Create an app.db file at the target DB_Path directory if it doesn't exist and create connection instance
         connection = sqlite3.connect(DB_PATH, isolation_level="DEFERRED")
+        
+        # Enforce foreign key checking
+        # Seems I always need to run this query for cascade updates to take place in SQLite
+        connection.execute(ENABLE_FOREIGN_KEYS)
         
         # Return / yield the conenction object to be used
         yield connection

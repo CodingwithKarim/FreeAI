@@ -1,5 +1,5 @@
 import re
-from typing import List, Union
+from typing import Any, Dict, List, Union
 from huggingface_hub import ModelInfo
 from transformers import BitsAndBytesConfig
 import torch
@@ -9,6 +9,16 @@ from app.utils.types.model_types import RunInferenceRequest
 from app.utils.types.cache_types import ContextMessage
 from app.db.messages import persist_user_and_assistant_message
 from app.utils.constants import ASSISTANT, DEFAULT_SYSTEM_PROMPT, SYSTEM, USER
+
+# Apple GPU usuage
+HAS_MPS  = getattr(torch.backends, "mps", None) and torch.backends.mps.is_available()
+
+# NVIDIA CUDA usage
+HAS_CUDA = torch.cuda.is_available()
+
+# AMD ROCM/HIP usage
+# Apparently NVIDIA CUDA & AMD ROC both qualify for cuda?
+IS_ROCM  = HAS_CUDA and (torch.version.hip is not None)
 
 def _is_quantizable(model_info) -> bool:
     tags = [t.lower() for t in model_info.tags]
@@ -46,6 +56,7 @@ def _get_quant_config(precision: str):
             bnb_8bit_compute_dtype=torch.float16,
             llm_int8_enable_fp32_cpu_offload=True
         )
+        
     return None
 
 def _build_plain_prompt(messages):
@@ -109,7 +120,7 @@ def _prepare_pipeline_input(request: RunInferenceRequest, mode: str) -> Union[Li
         # In generate mode, we just return the plain prompt string so model can complete it
         return request.prompt
     
-def update_cache_and_database(request: RunInferenceRequest, inference_output: str) -> None:
+def _update_cache_and_database(request: RunInferenceRequest, inference_output: str) -> None:
     # Cache & DB persistence is only neded in Conversation Mode
     if request.mode != "conversation":
         return
@@ -134,4 +145,42 @@ def update_cache_and_database(request: RunInferenceRequest, inference_output: st
     
     # Add user + assistant messages in database
     persist_user_and_assistant_message(request, inference_output)
+    
+def _get_device_config(precision: str) -> Dict[str, Any]:
+    # Check for MPS for Apple Silicon GPU
+    # Quantization not possible
+    if HAS_MPS:
+        return {
+            "device_map": {"": "mps"},
+            "torch_dtype": torch.float16,
+        }
+    
+    # Radeon open compute config
+    # Quantization not possible
+    if IS_ROCM:
+        return {
+            "device_map": {"": "cuda:0"},
+            "torch_dtype": torch.float16,
+        }
+        
+    # Standard NVIDIA/CUDA config
+    # Include quantization based on precision 
+    if HAS_CUDA:    
+        return {
+            "device_map": "auto",
+            "quantization_config": _get_quant_config(precision),
+        }
+
+    # CPU-only config
+    return {
+        "device_map": {"": "cpu"},
+        "torch_dtype": torch.float32,
+    }
+
+def _remove_think_tags(inference_prompt: str) -> str:
+    # This matches both <think> and </think>
+    return re.sub(r"</?think>", "", inference_prompt)
+
+
+
         

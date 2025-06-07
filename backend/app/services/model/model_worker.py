@@ -11,8 +11,9 @@ from app.db.model import get_model_directory_path
 from app.services.model.helper import (
     _build_plain_prompt,
     _cleanup_plain_text_response,
-    _get_quant_config,
+    _get_device_config,
     _prepare_pipeline_input,
+    _remove_think_tags,
 )
 from transformers import (
     AutoConfig,
@@ -164,6 +165,9 @@ def _process_inference_request(payload: dict, gen_pipe: TextGenerationPipeline,
     # If no built-in chat template is used, clean up the plain text response
     if not builtin_chat:
         final_response = _cleanup_plain_text_response(final_response, mode)
+      
+    # Remove any potential <think> tags  
+    final_response = _remove_think_tags(final_response).strip()
 
     # Return the final cleaned up model response
     return final_response
@@ -177,9 +181,7 @@ def _model_worker(local_dir: str, model_id: str, precision: str, child_conn):
         model = AutoModelForCausalLM.from_pretrained(
             local_dir,
             config=config,
-            device_map="auto",
-            quantization_config=_get_quant_config(precision),
-            offload_buffers=True,
+            **_get_device_config(precision)
         )
 
         # Load the tokenizer
@@ -202,7 +204,7 @@ def _model_worker(local_dir: str, model_id: str, precision: str, child_conn):
         # Send a message to the parent connection indicating the model is ready
         child_conn.send((READY,))
         
-        # Handle incoming inference requests with a service 
+        # Handle incoming inference requests in a service loop
         _handle_inference_requests(child_conn, gen_pipe, tokenizer, builtin_chat)
     
     except Exception as exception:

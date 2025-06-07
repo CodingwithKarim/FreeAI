@@ -38,8 +38,6 @@ export async function deleteSession(sessionId: string) {
             method: 'DELETE',
         });
 
-        console.log(response);
-
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }

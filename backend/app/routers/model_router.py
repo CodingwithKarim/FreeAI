@@ -165,10 +165,10 @@ def get_model_load_status_route():
     return load_statuses
 
 @router.post("/models/clear", response_model=SuccessMessageResponse, status_code=status.HTTP_200_OK)
-def clear_chat_context_route(request: ClearSessionCacheRequest):
+def clear_chat_context_route(request: ClearSessionCacheRequest, background_task: BackgroundTasks):
     try:
         # Clear the session cache
-        svc_clear_session_cache(request)
+        svc_clear_session_cache(request, background_task)
     except Exception as exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
