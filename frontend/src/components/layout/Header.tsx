@@ -7,7 +7,7 @@ export const Header: React.FC = () => {
         FreeAI
       </h1>
       <p className="mt-2 text-gray-600 text-lg font-medium">
-        Run AI Models Locally — Free, Private, and Fully Offline
+        Run Hugging Face Models Locally — Free, Private, and Fully Offline
       </p>
     </div>
   )
