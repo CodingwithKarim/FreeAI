@@ -1,9 +1,9 @@
 # <h1 align="center">FreeAI</h1>
 <p align="center"><em>Run open-source AI models locally — private, offline, and fully in your control. Powered by Hugging Face.</em></p>
 
-![image](https://github.com/user-attachments/assets/46a3b609-c841-406c-ab50-7df17734e206)
+![image](https://github.com/user-attachments/assets/2720491b-88e7-4896-8ce7-354d7a2dca01)
 
-**FreeAI** is a local-first control center for running open-source AI models entirely offline — no API keys, no paywalls, and no cloud dependencies. Most AI services today require accounts, internet access, or usage-based pricing just to use their AI models. FreeAI removes all of that. You can browse and download models from Hugging Face Hub, load them locally in 4-bit/8-bit/full precision, and chat, complete, or ask questions — all from a clean, private UI that runs entirely on your machine.
+**FreeAI** is your offline control center for running open-source AI models locally — no API keys, no paywalls, no internet required. While most AI tools demand accounts, subscriptions, or cloud access, FreeAI gives you complete control. Download models from Hugging Face, load them in 4-bit/8-bit/full precision, and chat, ask, or generate — all from a clean local UI.
 
 ---
 
@@ -57,16 +57,17 @@ Powerful 7B parameter models can typically fit entirely in 6–8 GB of VRAM when
 * Node.js + npm
 * Pip
 * Git (higly recommended to pull code + updates but can also directly download ZIP from GitHub)
+* PyTorch (if using CUDA, get CUDA equivalent version here: https://pytorch.org/get-started/locally/ 
 
 ### Installation
 
-bash
+```bash
 git clone https://github.com/CodingWithKarim/freeai.git
-
+```
 
 #### Backend
 
-bash
+```bash
 # Where you downloaded the project, navigate to root project directory
 cd C:\Code\freeai
 
@@ -90,11 +91,11 @@ pip install -r requirements.txt
 # Using Uvicorn, run the server
 # The first time you run the server after a while it may take a few seconds
 uvicorn app.main:app
-
+```
 
 #### Frontend
 
-bash
+```bash
 # From root projct directory, navigate to FreeAI/frontend folder
 cd ../frontend
 
@@ -103,7 +104,7 @@ npm install
 
 # Run the local Vite server
 npm run dev
-
+```
 
 Then visit http://localhost:5173. Run the backend server first then the frontend second. 
 
