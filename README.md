@@ -1,9 +1,10 @@
 # <h1 align="center">FreeAI</h1>
-<p align="center"><em>Run open-source AI models locally — private, offline, and fully in your control. Powered by Hugging Face.</em></p>
+<p align="center"><em>Run open-source AI models locally — private, offline, and fully in your control. Powered by <a href="https://huggingface.co" target="_blank">Hugging Face</a>.</em></p>
+
 
 ![image](https://github.com/user-attachments/assets/2720491b-88e7-4896-8ce7-354d7a2dca01)
 
-**FreeAI** is your offline control center for running open-source AI models locally — no API keys, no paywalls, no internet required. While most AI tools demand accounts, subscriptions, or cloud access, FreeAI gives you complete control. Download models from Hugging Face, load them in 4-bit/8-bit/full precision, and chat, ask, or generate — all from a clean local UI.
+**FreeAI** is your offline AI control center for running open-source AI models locally — no API keys, no paywalls, no internet required. While most AI tools demand accounts, subscriptions, or cloud access, FreeAI gives you complete control. Download models from Hugging Face, load them in 4-bit/8-bit/full precision, and chat, ask, or text-generate with them — all from a clean local UI.
 
 ---
 
@@ -56,8 +57,8 @@ Powerful 7B parameter models can typically fit entirely in 6–8 GB of VRAM when
 * Python
 * Node.js + npm
 * Pip
-* Git (higly recommended to pull code + updates but can also directly download ZIP from GitHub)
-* PyTorch (if using CUDA, get CUDA equivalent version here: https://pytorch.org/get-started/locally/ 
+* Git (recommended to pull code + future updates but can also directly download ZIP from GitHub repository)
+* PyTorch (get CUDA equivalent version here if applicable: https://pytorch.org/get-started/locally/)
 
 ### Installation
 
@@ -139,17 +140,17 @@ Then visit http://localhost:5173. Run the backend server first then the frontend
 
 **Backend**
 
+- **Uvicorn** – Python server that runs the FastAPI web framework with support for asynchronous operations, concurrency and fast request handling.
 - **FastAPI** – High-performance Python web framework used for building RESTful APIs. Powers model search, download, inference, and database interaction.  
-- **SQLite** – Lightweight, file-based database that stores session metadata, chat history, and model info. Requires zero setup and fits the local/offline design goal.  
-- **Uvicorn** – ASGI server that runs the FastAPI backend with support for concurrency and fast request handling.
-- **In-Memory Caching** – Inference results and session/model data are cached in memory for fast access. Writes to the SQLite database happen asynchronously in the background to avoid blocking the main thread.
+- **SQLite** – Lightweight, file-based database that stores session metadata, chat history, and model info. Requires zero setup and fits the local/offline design goal since data is stored directly to disk without remote storage.  
+- **In-Memory Caching** – Inference results and session/model data are cached in memory for fast read / write operations. Writes to the SQLite database happen asynchronously in the background to avoid blocking the main thread and allow the application to be more responsive / efficient.
 
 **Inference & Model Handling**
 
-- **Hugging Face Transformers Library** – Core inference library used to load and run language models from local files.  
-- **Hugging Face Hub Client** – Used to query/search and download model repositories directly from Hugging Face Hub.  
-- **bitsandbytes** – Library that enables 4-bit and 8-bit quantized model loading, reducing VRAM usage and allowing large models to run on consumer-grade GPUs.  
-- **PyTorch** – Underlying framework used by Transformers for AI model execution/interaction.
+- **Hugging Face Hub Client** – Used to query / search for AI models as well as download those models directly to local computer. 
+- **Hugging Face Transformers Library** – Core inference / text-generation library used to load and run language models from local model files.   
+- **bitsandbytes** – Library that enables 4-bit and 8-bit quantized model loading, reducing VRAM usage and allowing large models to run on consumer-grade GPUs. (Requires an NVDIA CUDA GPU) 
+- **PyTorch** – Underlying framework used by Transformers for AI model execution/interaction. 
 
 ---
 
@@ -176,30 +177,33 @@ Hugging Face’s API does not expose model size directly. However, we extract it
 
 ## Architecture Overview
 
-text
+                             ┌────────────────────────────┐
+                             │   React UI (Vite Server)   │
+                             └──────────┬─────────────────┘
+                                        ▲
+                                        │
+                             ┌──────────┴──────────┐
+                             │ Uvicorn / FastAPI   │
+                             │      Backend        │
+                             └───────┬────▲────────┘────┬────▲──────────────────────┬───▲───
+                                     │    │             │    │                      │   │   
+                                     ▼    │             ▼    │                      ▼   │   
+          ┌────────────────────────────────────┐      ┌──────────────────────┐      ┌────────────────────────┐
+          │      Hugging Face Transformers     │      │   SQLite Database    |      │    In-Memory Cache     |
+          │      (Inference & Model Loading)   │      │   (Sessions & Cache) │      └────────────────────────┘
+          └──────────────▲─────────────────────┘      └──────────────────────┘
+                         │                                 
+                         ▼                                 
+         ┌────────────────────────┐         
+         │  Local Model Files     │         
+         │ (.bin / .safetensors)  │         
+         └────────────┬───────────┘
+                      ▼
+        ┌──────────────────────────────────┐
+        │ Quantized Model Handling (CUDA / │
+        │ CPU via bitsandbytes & PyTorch)  │
+        └──────────────────────────────────┘
 
-
-                            ┌────────────────────────────┐
-                            │  React UI (Vite Server)    │
-                            └──────────┬─────────────────┘
-                                       │
-                                       ▼
-                            ┌────────────────────────────┐
-                            │       FastAPI Backend       │
-                            └────┬────────┬────────────┬──┘
-                                 │        │            │
-                                 ▼        ▼            ▼
-        ┌────────────────────────────┐ ┌────────────┐ ┌──────────────────────┐
-        │ Hugging Face Transformers  │ │ In-Memory  │ │   SQLite Database    │
-        │         Library            │ │   Cache     │ │                      │
-        └───────┬──────────┬─────────┘ └────────────┘ └──────────────────────┘
-                │          │
-                ▼          ▼
-     ┌────────────────┐   ┌────────────────────────────┐
-     │ Local Model     │   │ bitsandbytes / CUDA / CPU  │
-     │ Files (.bin /   │◄──┴────────────────────────────┘
-     │ .safetensors)   │
-     └────────────────┘
 
 
 ---
