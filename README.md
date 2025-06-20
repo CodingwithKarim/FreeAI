@@ -3,7 +3,11 @@
 
 ![image](https://github.com/user-attachments/assets/2720491b-88e7-4896-8ce7-354d7a2dca01)
 
-FreeAI is a powerful and user friendly AI control center for running AI models entirely on your own computer hardware. No subscriptions. No API keys. No internet required. Unlike most AI tools that lock features behind paywalls or require cloud access and user accounts, FreeAI puts you in full control to download models from Hugging Face directly to your local computer, run them in 4-bit, 8-bit, or full precision, and interact with them seamlessly while keeping your data private and your wallet untouched. Whether you’re chatting, generating text, or testing LLMs locally, FreeAI makes it effortless. 
+FreeAI is a powerful and user friendly AI control center for running AI models entirely on your own computer hardware. No subscriptions. No API keys. No internet required. 
+
+Unlike most AI tools that lock features behind paywalls or require cloud access and user accounts, FreeAI puts you in full control to download models from Hugging Face directly to your local computer, run them in 4-bit, 8-bit, or full precision, and interact with them seamlessly while keeping your data private and your wallet untouched. 
+
+Whether you’re chatting, generating text, or testing LLMs locally, FreeAI makes it effortless. 
 
 ---
 
