@@ -1,10 +1,9 @@
 # <h1 align="center">FreeAI</h1>
 <p align="center"><em>Run open-source AI models locally — private, offline, and fully in your control. Powered by <a href="https://huggingface.co" target="_blank">Hugging Face</a>.</em></p>
 
-
 ![image](https://github.com/user-attachments/assets/2720491b-88e7-4896-8ce7-354d7a2dca01)
 
-**FreeAI** is your offline AI control center for running open-source AI models locally — no API keys, no paywalls, no internet required. While most AI tools demand accounts, subscriptions, or cloud access, FreeAI gives you complete control. Download models from Hugging Face, load them in 4-bit/8-bit/full precision, and chat, ask, or text-generate with them — all from a clean local UI.
+FreeAI is a powerful and user friendly AI control center for running AI models entirely on your own computer hardware. No subscriptions. No API keys. No internet required. Unlike most AI tools that lock features behind paywalls or require cloud access and user accounts, FreeAI puts you in full control to download models from Hugging Face directly to your local computer, run them in 4-bit, 8-bit, or full precision, and interact with them seamlessly while keeping your data private and your wallet untouched. Whether you’re chatting, generating text, or testing LLMs locally, FreeAI makes it effortless. 
 
 ---
 
@@ -23,16 +22,16 @@
 ## Features
 
 🔹 **Model Search & Download**
-Search and Download Hugging Face AI models directly in-app. Filter by downloads, likes, trending. Sort by quantized or uncensored models.
+Search and Download Hugging Face AI models directly from Model registry control. Filter by downloads, likes, trending. Sort by quantized or uncensored models.
 
 🔹 **Flexible Chat Modes**
-Switch between Ask (Q\&A), Chat (memory), and Complete (open-ended generation).
+Switch between Ask (Q\&A), Chat (conversational), and Text Complete (open-ended text generation).
 
 🔹 **Session Management**
-Create, delete, and manage isolated chat sessions with named histories and cached context.
+Create, delete, and manage isolated chat sessions with own session context. 
 
 🔹 **Precision Selection**
-Choose between 4-bit, 8-bit, or full precision when loading models into memory.
+Choose between 4-bit, 8-bit, or full precision when loading model into memory.
 
 🔹 **Offline-Only Inference**
 No API keys or cloud access required. All processing happens on your machine.
@@ -121,9 +120,10 @@ Then visit http://localhost:5173. Run the backend server first then the frontend
 
      *Ask Mode: One-off Q&A, great for quick questions
 
-      *Chat Mode: Multi-turn conversations with persistent context/history
+     *Chat Mode: Multi-turn conversations with persistent context/history
 
-      *Complete Mode: Open-ended text generation based on input
+     *Complete Mode: Open-ended text generation based on input
+
 6. **Toggle context sharing** → Choose whether to share memory across models or isolate it per model. Helpful for model comparisons or multi-model conversations.
 7. **Send messages and view replies** → All inference is performed locally using your hardware.
 8. **Data Persistence** →  All sessions, messages, and models data is stored in a local SQLite database in project backend directory. Database is located at FreeAI/backend/data and is created once server is successfully started. 
@@ -135,13 +135,13 @@ Then visit http://localhost:5173. Run the backend server first then the frontend
 **Frontend**
 
 - **React** – Handles all UI logic, including model browsing, session management, chat interaction, and toggle options.
-- **Vite** – Development server with instant reload.
-- **Tailwind CSS** – Utility-first framework for building clean, responsive interfaces without writing custom CSS.  
+- **Vite** – Frontend development server
+- **Tailwind CSS** – CSS framework for building clean, responsive interfaces without writing custom CSS.  
 
 **Backend**
 
-- **Uvicorn** – Python server that runs the FastAPI web framework with support for asynchronous operations, concurrency and fast request handling.
-- **FastAPI** – High-performance Python web framework used for building RESTful APIs. Powers model search, download, inference, and database interaction.  
+- **Uvicorn** – Python server that runs the FastAPI web framework with support for asynchronous operations, concurrency and request handling.
+- **FastAPI** – High-performance Python web framework used for building RESTful APIs. Powers model search, download, inference, and request/response interaction.  
 - **SQLite** – Lightweight, file-based database that stores session metadata, chat history, and model info. Requires zero setup and fits the local/offline design goal since data is stored directly to disk without remote storage.  
 - **In-Memory Caching** – Inference results and session/model data are cached in memory for fast read / write operations. Writes to the SQLite database happen asynchronously in the background to avoid blocking the main thread and allow the application to be more responsive / efficient.
 
